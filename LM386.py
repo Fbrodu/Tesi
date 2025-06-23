@@ -1,16 +1,12 @@
 import pandas as pd
 import numpy as np
 import seaborn as sns
-
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import ShuffleSplit
-from sklearn.model_selection import GridSearchCV
-
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
+from sklearn.preprocessing import RobustScaler
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.metrics import classification_report, confusion_matrix
 
 from sklearn import svm
 from sklearn.neighbors import KNeighborsClassifier
@@ -21,9 +17,9 @@ def plot_dataset(x, y, feat0=0, feat1=1):
     labels = ['Fake', 'Real']
     class_labels = np.unique(y).astype(int)
     for k in class_labels:
-      plt.plot(x[y == k, feat0], x[y == k, feat1], colors[k % 6], label=labels[k])
-
+        plt.plot(x[y == k, feat0], x[y == k, feat1], colors[k % 6], label=labels[k])
     plt.legend()
+
 
 def plot_decision_regions(x, y, classifier, resolution=0.1):
     # setup marker generator and color map
@@ -44,10 +40,10 @@ def plot_decision_regions(x, y, classifier, resolution=0.1):
 
 # Leggi il file CSV
 dataset = pd.read_csv("LM386_Features_4D.csv")
-# Rimuovi colonne inutili o non ancora disponibili
-X = dataset.drop(columns=["T150_aging"])
+
 # Creo label binarie 0 e 1
-y = dataset["original"].astype(int)
+dataset["original"] = dataset["original"].astype(int)
+
 # Features
 features = ["quiescent_current", "voltage_gain", "cutoff_frequency", "current_slope"]
 
@@ -60,23 +56,38 @@ sns.pairplot(
 )
 plt.show()
 
+# Split stratificato 80/20 per ogni gruppo di dispositivi
+train_list = []
+test_list = []
+
+for group_id, group_data in dataset.groupby("group"):
+    train_group, test_group = train_test_split(
+        group_data, test_size=0.2, shuffle=True, random_state=42, stratify=group_data["original"])
+    train_list.append(train_group)
+    test_list.append(test_group)
+
+train = pd.concat(train_list)
+test = pd.concat(test_list)
+
+# Separo X e y
+X_tr = train[features]
+y_tr = train["original"]
+X_ts = test[features]
+y_ts = test["original"]
+
 # Normalizzo
-scaler = MinMaxScaler()
-scaled_values = scaler.fit_transform(dataset[features])
-
-# Creo un nuovo DataFrame con i dati normalizzati
-df_scaled = pd.DataFrame(scaled_values, columns=features)
-
-# Aggiungi la colonna "original"
-df_scaled["original"] = dataset["original"].values
+scaler = RobustScaler()
+X_tr_scaled = scaler.fit_transform(X_tr)
+X_ts_scaled = scaler.transform(X_ts)
 
 # Plot su dati normalizzati
+df_scaled = pd.DataFrame(X_tr_scaled, columns=features)
+df_scaled["original"] = y_tr.values
+
 sns.pairplot(df_scaled, hue="original", diag_kind="hist", vars=features)
 plt.show()
 
-# Cross-validation
-splitter = ShuffleSplit(n_splits=5, test_size=0.2, random_state=42)
-
+# Definizione classificatori con grid search
 clf_list = [
     GridSearchCV(estimator=svm.SVC(kernel="linear"), param_grid={
         'C': [0.1, 1, 10, 100]}, cv=3),
@@ -84,59 +95,35 @@ clf_list = [
         'C': [0.1, 1, 10, 100], 'gamma': [0.1, 1, 10]}, cv=3),
     GridSearchCV(estimator=KNeighborsClassifier(), param_grid={
         'n_neighbors': [3, 5, 7]}, cv=3),
-
 ]
 
 clf_names = ['SVM - linear', 'SVM - RBF', 'kNN']
-
-# Inizializza array con zeri per store sccuracy
-acc = np.zeros((len(clf_list), splitter.get_n_splits()))
 
 # Inizializza lista per conservare true e predicted labels
 labels_y_true = [[] for _ in clf_list]
 labels_y_pred = [[] for _ in clf_list]
 
 # Store migliori iperparametri per ogni classificatore
-best_params_first_fold = [None] * len(clf_list)
+best_params_all = [None] * len(clf_list)
 
-for i, (train_idx, test_idx) in enumerate(splitter.split(dataset)):
-    train = dataset.iloc[train_idx] # Indici righe train
-    test = dataset.iloc[test_idx] # Indici righe test
+# Classifier loop
+for k, clf in enumerate(clf_list):
+    clf.fit(X_tr_scaled, y_tr)
 
-    X_tr = train[["quiescent_current", "voltage_gain"]]
-    y_tr = train["original"]
-    X_ts = test[["quiescent_current", "voltage_gain"]]
-    y_ts = test["original"]
+    y_pred = clf.predict(X_ts_scaled)
 
-    scaler = MinMaxScaler()
-    X_tr_scaled = scaler.fit_transform(X_tr)
-    X_ts_scaled = scaler.transform(X_ts)
+    labels_y_true[k].extend(y_ts)
+    labels_y_pred[k].extend(y_pred)
 
-    # Classifier loop
-    for k, clf in enumerate(clf_list):
-        clf.fit(X_tr_scaled, y_tr)
-
-        y_pred = clf.predict(X_ts_scaled)
-
-        # Store accuratezza per ogni classificatore
-        acc[k, i] = (y_pred == y_ts).mean()
-
-        # Store tutte le true and predicted labels per ogni classificatore
-        labels_y_true[k].extend(y_ts)
-        labels_y_pred[k].extend(y_pred)
-
-        # Store migliori parametri per ogni classificatore
-        best_params = tuple(sorted(clf.best_params_.items()))
-        if i == 0:
-            best_params_first_fold[k] = clf.cv_results_
+    best_params_all[k] = clf.cv_results_
 
 # Stampa iperparametri
 for k, name in enumerate(clf_names):
-    print(f"\n {name} ")
+    print(f"\n{name}")
 
-    cv_results = best_params_first_fold[k]  # cv_results_ from the first outer fold for classifier k
-    best_index = np.argmax(cv_results['mean_test_score'])  # Index of the best hyperparameter setting
-    best_params = cv_results['params'][best_index]  # Corresponding best hyperparameters
+    cv_results = best_params_all[k]
+    best_index = np.argmax(cv_results['mean_test_score'])
+    best_params = cv_results['params'][best_index]
     print(f"Best hyperparams: {dict(best_params)}")
     print("    - Grid scores on development set:")
     means = cv_results['mean_test_score']
@@ -144,12 +131,17 @@ for k, name in enumerate(clf_names):
     for mean, std, params in zip(means, stds, cv_results['params']):
         print(f"        {mean:.3f} (+/-{std * 2:.03f}) for {params}")
 
-    print(f"Mean test accuracy = {acc[k].mean():.2%} +/- {acc[k].std():.2%}")
+    acc = np.mean(np.array(labels_y_true[k]) == np.array(labels_y_pred[k]))
+    print(f"Test accuracy = {acc:.2%}")
 
     print("Classification report:")
     print(classification_report(labels_y_true[k], labels_y_pred[k], target_names=["Fake", "Real"]))
     print("Confusion matrix:")
     print(confusion_matrix(labels_y_true[k], labels_y_pred[k]))
 
-
+    # Plot delle regioni decisionali (solo sulle prime due feature)
+    clf.fit(X_tr_scaled[:, :2], y_tr)
+    plot_decision_regions(X_tr_scaled[:, :2], y_tr, clf)
+    plt.title(name)
+    plt.show()
 
