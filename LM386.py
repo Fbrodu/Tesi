@@ -42,7 +42,7 @@ def plot_decision_regions(x, y, classifier, resolution=0.1):
 dataset = pd.read_csv("LM386_Features_4D.csv")
 
 # Creo label binarie 0 e 1
-dataset["original"] = dataset["original"].astype(int)
+#dataset["original"] = dataset["original"].astype(int)
 
 # Features
 features = ["quiescent_current", "voltage_gain", "cutoff_frequency", "current_slope"]
@@ -54,7 +54,8 @@ sns.pairplot(
     vars=features,
     diag_kind="hist"  # mostra istogrammi invece di KDE sulla diagonale
 )
-plt.show()
+plt.savefig("pairplot_raw.png", dpi=300, bbox_inches='tight')
+plt.close()
 
 # Split stratificato 80/20 per ogni gruppo di dispositivi
 train_list = []
@@ -85,7 +86,8 @@ df_scaled = pd.DataFrame(X_tr_scaled, columns=features)
 df_scaled["original"] = y_tr.values
 
 sns.pairplot(df_scaled, hue="original", diag_kind="hist", vars=features)
-plt.show()
+plt.savefig("pairplot_scaled.png", dpi=300, bbox_inches='tight')
+plt.close()
 
 # Definizione classificatori con grid search
 clf_list = [
@@ -98,7 +100,8 @@ clf_list = [
 ]
 
 clf_names = ['SVM - linear', 'SVM - RBF', 'kNN']
-
+# Inizializza array per salvare l'accuratezza
+acc = np.zeros(len(clf_list))
 # Inizializza lista per conservare true e predicted labels
 labels_y_true = [[] for _ in clf_list]
 labels_y_pred = [[] for _ in clf_list]
@@ -116,9 +119,10 @@ for k, clf in enumerate(clf_list):
     labels_y_pred[k].extend(y_pred)
 
     best_params_all[k] = clf.cv_results_
+    
 
 # Stampa iperparametri
-for k, name in enumerate(clf_names):
+for k, (name, clf) in enumerate(zip(clf_names, clf_list)):
     print(f"\n{name}")
 
     cv_results = best_params_all[k]
@@ -131,8 +135,8 @@ for k, name in enumerate(clf_names):
     for mean, std, params in zip(means, stds, cv_results['params']):
         print(f"        {mean:.3f} (+/-{std * 2:.03f}) for {params}")
 
-    acc = np.mean(np.array(labels_y_true[k]) == np.array(labels_y_pred[k]))
-    print(f"Test accuracy = {acc:.2%}")
+    acc[k] = np.mean(np.array(labels_y_true[k]) == np.array(labels_y_pred[k]))
+    print(f"Test accuracy = {acc[k]:.2%}")
 
     print("Classification report:")
     print(classification_report(labels_y_true[k], labels_y_pred[k], target_names=["Fake", "Real"]))
@@ -142,6 +146,8 @@ for k, name in enumerate(clf_names):
     # Plot delle regioni decisionali (solo sulle prime due feature)
     clf.fit(X_tr_scaled[:, :2], y_tr)
     plot_decision_regions(X_tr_scaled[:, :2], y_tr, clf)
-    plt.title(name)
-    plt.show()
+    plot_dataset(X_ts_scaled[:, :2], y_ts, feat0=0, feat1=1)
+    plt.title(f"{name} - Decision Regions with Test Data")
+    plt.savefig(f"decision_region_with_test_{name.replace(' ', '_')}.png", dpi=300, bbox_inches='tight')
+    plt.close()
 
