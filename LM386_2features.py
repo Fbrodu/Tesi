@@ -24,7 +24,7 @@ def plot_dataset(x, y, feat0=0, feat1=1):
     plt.legend()
 
 
-def plot_decision_regions(x, y, classifier, resolution=0.1):
+def plot_decision_regions(x, y, classifier, resolution=0.01):
     # setup marker generator and color map
     colors = ('blue', 'red', 'lightgreen', 'black', 'cyan', 'magenta')
     cmap = ListedColormap(colors[:len(np.unique(y))])
