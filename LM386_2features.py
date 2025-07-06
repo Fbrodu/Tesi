@@ -17,7 +17,7 @@ from sklearn.neighbors import KNeighborsClassifier
 
 def plot_dataset(x, y, feat0=0, feat1=1):
     colors = ['b.', 'r.', 'g.', 'k.', 'c.', 'm.']
-    labels = ['Fake', 'Real']
+    labels = ['Fake', 'True']
     class_labels = np.unique(y).astype(int)
     for k in class_labels:
         plt.plot(x[y == k, feat0], x[y == k, feat1], colors[k % 6], label=labels[k])
@@ -29,13 +29,22 @@ def plot_decision_regions(x, y, classifier, resolution=0.01):
     colors = ('blue', 'red', 'lightgreen', 'black', 'cyan', 'magenta')
     cmap = ListedColormap(colors[:len(np.unique(y))])
 
-    # plot the decision surface
-    x1_min, x1_max = x[:, 0].min() - 0.02, x[:, 0].max() + 0.02
-    x2_min, x2_max = x[:, 1].min() - 0.02, x[:, 1].max() + 0.02
+    # plot the decision surface, with 10% margin
+    x1_min, x1_max = x[:, 0].min(), x[:, 0].max()
+    x2_min, x2_max = x[:, 1].min(), x[:, 1].max()
+    x1_margin = (x1_max - x1_min) * 0.1
+    x2_margin = (x2_max - x2_min) * 0.1
+    x1_min -= x1_margin
+    x1_max += x1_margin
+    x2_min -= x2_margin
+    x2_max += x2_margin
+
     xx1, xx2 = np.meshgrid(np.arange(x1_min, x1_max, resolution),
                            np.arange(x2_min, x2_max, resolution))
+    
     Z = classifier.predict(np.array([xx1.ravel(), xx2.ravel()]).T)
     Z = Z.reshape(xx1.shape)
+    
     plt.contourf(xx1, xx2, Z, alpha=0.4, cmap=cmap)
     plt.xlim(xx1.min(), xx1.max())
     plt.ylim(xx2.min(), xx2.max())
