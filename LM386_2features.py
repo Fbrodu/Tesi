@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -15,6 +16,13 @@ from sklearn import svm
 from sklearn.neighbors import KNeighborsClassifier
 
 
+# === Percorsi output ===
+plot_dir = "/workspaces/Tesi/Output files/Plot"
+metrics_dir = "/workspaces/Tesi/Output files/Metrics"
+os.makedirs(plot_dir, exist_ok=True)
+os.makedirs(metrics_dir, exist_ok=True)
+
+
 def plot_dataset(x, y, feat0=0, feat1=1):
     colors = ['b.', 'r.', 'g.', 'k.', 'c.', 'm.']
     labels = ['Fake', 'True']
@@ -25,11 +33,9 @@ def plot_dataset(x, y, feat0=0, feat1=1):
 
 
 def plot_decision_regions(x, y, classifier, resolution=0.01):
-    # setup marker generator and color map
     colors = ('blue', 'red', 'lightgreen', 'black', 'cyan', 'magenta')
     cmap = ListedColormap(colors[:len(np.unique(y))])
 
-    # plot the decision surface, with 10% margin
     x1_min, x1_max = x[:, 0].min(), x[:, 0].max()
     x2_min, x2_max = x[:, 1].min(), x[:, 1].max()
     x1_margin = (x1_max - x1_min) * 0.1
@@ -50,16 +56,11 @@ def plot_decision_regions(x, y, classifier, resolution=0.01):
     plt.ylim(xx2.min(), xx2.max())
 
 
-# Leggi il file CSV
+# === Caricamento dati ===
 dataset = pd.read_csv("LM386_Features_4D.csv")
-
-# Creo label binarie 0 e 1
-#dataset["original"] = dataset["original"].astype(int)
-
-# Features
 features = ["quiescent_current", "voltage_gain", "cutoff_frequency", "current_slope"]
 
-# Split  80/20 per ogni gruppo di dispositivi
+# === Split 80/20 per gruppo ===
 train_list = []
 test_list = []
 
@@ -72,32 +73,26 @@ for group_id, group_data in dataset.groupby("group"):
 train = pd.concat(train_list)
 test = pd.concat(test_list)
 
-# Separo X e y
 X_tr = train[features]
 y_tr = train["original"]
 X_ts = test[features]
 y_ts = test["original"]
 
-# Normalizzo
 scaler = RobustScaler()
 X_tr_scaled = scaler.fit_transform(X_tr)
 X_ts_scaled = scaler.transform(X_ts)
 
-# Plot su dati normalizzati
+# === Pairplot ===
 df_scaled = pd.DataFrame(X_tr_scaled, columns=features)
 df_scaled["original"] = y_tr.values
-
 sns.pairplot(df_scaled, hue="original", diag_kind="hist", vars=features)
-plt.savefig("pairplot_scaled.png", dpi=300, bbox_inches='tight')
+plt.savefig(os.path.join(plot_dir, "pairplot_scaled.png"), dpi=300, bbox_inches='tight')
 plt.close()
 
-# Cross-val interna (per GridSearchCV)
+# === Cross-validation ===
 hyp_cv = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
-
-# Cross-val esterna (valutazione finale)
 KF_cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
-# Definizione classificatori con grid search
 def get_clf_list():
     return [
         GridSearchCV(estimator=svm.SVC(kernel="linear"), param_grid={
@@ -109,13 +104,9 @@ def get_clf_list():
     ]
 
 clf_names = ['SVM - linear', 'SVM - RBF', 'kNN']
-
 n_classifiers = 3
-
-# Report delle features a coppie
 feature_pairs = list(combinations(features, 2))  
 results_list = []
-results_all_pairs = []
 
 for feat0, feat1 in feature_pairs:
     print(f"\n--- Evaluating features pair: ({feat0}, {feat1}) ---")
@@ -139,7 +130,6 @@ for feat0, feat1 in feature_pairs:
 
         for k, clf in enumerate(clf_list):
             clf.fit(X_train_fold, y_train_fold)
-
             y_pred = clf.predict(X_val_fold)
 
             acc_pair[k, i] = (y_pred == y_val_fold).mean()
@@ -154,7 +144,6 @@ for feat0, feat1 in feature_pairs:
 
         scores = defaultdict(list)
         params = None
-
         for fold_result in cv_results_all_pair[k]:
             if params is None:
                 params = fold_result['params']
@@ -188,7 +177,6 @@ for feat0, feat1 in feature_pairs:
         print(f"Most frequent best hyperparams: {best_params} ({most_common[1]} folds)")
 
         print(f"Cross-validation accuracy = {acc_pair[k].mean():.2%} +/- {acc_pair[k].std():.2%}")
-
         print("Confusion matrix Cross-validation Data:")
         print(confusion_matrix(labels_y_true_pair[k], labels_y_pred_pair[k]))
 
@@ -197,15 +185,16 @@ for feat0, feat1 in feature_pairs:
         plot_decision_regions(X_tr_scaled_pair, y_tr.values, clf)
         plot_dataset(X_tr_scaled_pair, y_tr.values)
         plt.title(f"{name} - Decision Regions with features ({feat0}, {feat1})")
-        plt.savefig(f"decision_region_{name.replace(' ', '_')}_{feat0}_{feat1}.png", dpi=300, bbox_inches='tight')
+        filename = f"decision_region_{name.replace(' ', '_')}_{feat0}_{feat1}.png"
+        plt.savefig(os.path.join(plot_dir, filename), dpi=300, bbox_inches='tight')
         plt.close()
 
-        precision, recall, f1, support = precision_recall_fscore_support(labels_y_true_pair[k], labels_y_pred_pair[k], labels=[0, 1], zero_division=0)
+        precision, recall, f1, support = precision_recall_fscore_support(
+            labels_y_true_pair[k], labels_y_pred_pair[k], labels=[0, 1], zero_division=0)
 
         precision_macro = precision.mean()
         recall_macro = recall.mean()
         f1_macro = f1.mean()
-
         total_support = support.sum()
         precision_weighted = np.sum(precision * support) / total_support
         recall_weighted = np.sum(recall * support) / total_support
@@ -233,18 +222,8 @@ for feat0, feat1 in feature_pairs:
             "F1 Weighted": f1_weighted
         })
 
-# Crea DataFrame finale
+# === Salvataggio risultati ===
 df_results = pd.DataFrame(results_list)
-
-# Salva il DataFrame con le metriche calcolate in un file CSV
-df_results.to_csv("metrics_summary_validation_2f.csv", index=False)
-
-# Salva le stesse metriche in un file txt
-with open("metrics_summary_validation_2f.txt", "w", encoding="utf-8") as f:
+df_results.to_csv(os.path.join(metrics_dir, "metrics_summary_validation_2f.csv"), index=False)
+with open(os.path.join(metrics_dir, "metrics_summary_validation_2f.txt"), "w", encoding="utf-8") as f:
     f.write(df_results.to_string(index=False))
-
-
-
-
-
-
