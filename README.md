@@ -55,6 +55,14 @@ I metodi confrontati sono:
 - `LM386_2features.py` – genera scatter plot a 2 a 2 tra le features
 - `LM386.py` – valuta le 4 features contemporaneamente (da aggiornare)
 
+Sono stati utilizzati i seguenti classificatori con **GridSearchCV** per l’ottimizzazione degli iperparametri:
+- **SVM** con kernel lineare
+- **SVM** con kernel RBF (radiale)
+- **k-NN** (K-Nearest Neighbors)
+
+La valutazione dei modelli è stata effettuata con **cross-validation** ripetuta su 5 fold, e le metriche analizzate includono accuratezza, precisione, recall, F1-score e matrice di confusione.  
+
+
 ## File di Output
 I grafici e le metriche vengono salvati in:
   - `Output files/Dati Francesca`
