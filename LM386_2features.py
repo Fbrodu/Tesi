@@ -100,7 +100,7 @@ def get_clf_list():
         GridSearchCV(estimator=svm.SVC(kernel="rbf"), param_grid={
             'C': [0.1, 1, 10, 100], 'gamma': [0.1, 1, 10]}, cv=hyp_cv),
         GridSearchCV(estimator=KNeighborsClassifier(), param_grid={
-            'n_neighbors': [3, 5, 7]}, cv=hyp_cv),
+            'n_neighbors': [3, 5, 7, 9, 11]}, cv=hyp_cv),
     ]
 
 clf_names = ['SVM - linear', 'SVM - RBF', 'kNN']
