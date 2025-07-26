@@ -25,7 +25,7 @@ def analyze_file(filepath, group):
 
         # Corrente di riposo 6 V
         row_6v = df[df['Vs'] == 6.0]
-        quiescent = row_6v['Is'].values[0]
+        quiescent = row_6v['Is'].values[0] * 1000  # in mA
         quiescent_list.append(quiescent)
 
         # Pendenza tra 6 e 12 V con Regressione lineare ai minimi quadrati
