@@ -55,7 +55,7 @@ I metodi confrontati sono:
 - `LM386_2features.py` – genera scatter plot a 2 a 2 tra le features
 - `LM386.py` – valuta le 4 features contemporaneamente (da aggiornare)
 
-### 5. File di Output
+## File di Output
 I grafici e le metriche vengono salvati in:
   - `Output files/Dati Francesca`
   - `Output files/Dati Simone`
