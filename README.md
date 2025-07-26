@@ -30,18 +30,32 @@ I file delle misure sono contenuti in:
 - `Estrazione Features/Frequenza` – misure in AC (risposta in frequenza)  
 All’interno sono presenti sottocartelle per ciascun gruppo di dispositivi.
 
-### 2. Estrazione delle Feature
+### 2. Estrazione delle Features
 - `Estrazione_features_current.py` – estrae corrente di riposo e pendenza
 - `Estrazione_features_freq.py` – estrae guadagno e frequenza di taglio
 - `LM386_Merged_Data.py` – unisce le feature estratte in file CSV
 
 I file `LM386_Current_Slope_Francesca.csv` e `LM386_Gain_Freq_Francesca.csv` contengono dati parziali e sono stati usati come passaggi intermedi.
 
-### 3. Visualizzazione e Classificazione
-- `LM386_2features.py` – genera scatter plot a 2 a 2 tra le feature
+### 3. Scelta dello Scaler
+
+La cartella `Scelta Scaler` contiene uno script e alcuni grafici utili per confrontare diversi metodi di normalizzazione delle features, al fine di identificare il più adatto.
+
+- `LM386_scaler.py` – applica diversi metodi di scaling e genera pairplot per visualizzare la distribuzione dei dati trasformati.
+
+I metodi confrontati sono:
+- `MinMaxScaler` → `pairplot_scaler_MinMax.png`
+- `StandardScaler` → `pairplot_scaler_Standard.png`
+- `RobustScaler` → `pairplot_scaler_Robust.png`
+- `Normalizer` → `pairplot_scaler_Normalizer.png`
+
+**RobustScaler** è stato scelto come metodo di scaling principale per le fasi successive del progetto.
+
+### 4. Visualizzazione e Classificazione
+- `LM386_2features.py` – genera scatter plot a 2 a 2 tra le features
 - `LM386.py` – valuta le 4 features contemporanemamente (da aggiornare)
 
-### 4. File di Output
+### 5. File di Output
 I grafici e le metriche vengono salvati in:
   - `Output files/Dati Francesca`
   - `Output files/Dati Simone`
