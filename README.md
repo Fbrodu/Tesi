@@ -46,19 +46,10 @@ I grafici e le metriche vengono salvati in:
   - `Output files/Dati Francesca`
   - `Output files/Dati Simone`
   - `Output files/Dati Tot`
-    
-Ogni cartella contiene:
-- `Metrics/` – Valori delle metriche di classificazione
-- `Plot/` – Grafici generati (scatter, pairplot, ecc.)
 
 Per ciascun set di dati (Francesca, Simone, Totale), sono presenti le seguenti directory:
-- `Metrics/` – metriche, valutazioni, riassunti
-- `Plot/` – grafici e confronti visivi tra le feature
-
-Le cartelle si trovano in:
-- `Output files/Dati Francesca/`
-- `Output files/Dati Simone/`
-- `Output files/Dati Tot/`
+- `Metrics/` – metriche e valutazioni
+- `Plot/` – grafici e confronti visivi tra le features
 
 ---
 
