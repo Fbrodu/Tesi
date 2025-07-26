@@ -31,7 +31,7 @@ Procedimento:
 Output:
 -------
 - Grafici: nella cartella `/Output files/Plot`
-- Metriche: in `/Output files/Metrics/metrics_summary_validation_2f.csv` e `.txt`
+- Metriche: nella cartella `/Output files/Metrics/
 """
 
 import os
@@ -52,8 +52,8 @@ from sklearn import svm
 from sklearn.neighbors import KNeighborsClassifier
 
 # === Creazione delle cartelle di output per salvare grafici e metriche ===
-plot_dir = "/workspaces/Tesi/Output files/Plot"
-metrics_dir = "/workspaces/Tesi/Output files/Metrics"
+plot_dir = "/workspaces/Tesi/Output files/Dati Francesca/Plot"
+metrics_dir = "/workspaces/Tesi/Output files/Dati Francesca/Metrics"
 os.makedirs(plot_dir, exist_ok=True)
 os.makedirs(metrics_dir, exist_ok=True)
 
@@ -91,7 +91,7 @@ def plot_decision_regions(x, y, classifier, resolution=0.01):
     plt.ylim(xx2.min(), xx2.max())
 
 # === Caricamento del dataset e definizione della variabile features ===
-dataset = pd.read_csv("LM386_Features_4D.csv")
+dataset = pd.read_csv("LM386_Features_4D_Francesca.csv")
 features = ["quiescent_current", "voltage_gain", "cutoff_frequency", "current_slope"]
 
 # === Split 80/20 diviso per ogni gruppo ===
@@ -120,7 +120,7 @@ X_ts_scaled = scaler.transform(X_ts)
 df_scaled = pd.DataFrame(X_tr_scaled, columns=features)
 df_scaled["original"] = y_tr.values
 sns.pairplot(df_scaled, hue="original", diag_kind="hist", vars=features)
-plt.savefig(os.path.join(plot_dir, "pairplot_scaled.png"), dpi=300, bbox_inches='tight')
+plt.savefig(os.path.join(plot_dir, "pairplot_scaled_Francesca.png"), dpi=300, bbox_inches='tight')
 plt.close()
 
 # === Definizione cross-validation ===
@@ -241,8 +241,8 @@ for feat0, feat1 in feature_pairs:
         clf.fit(X_tr_scaled_pair, y_tr.values)
         plot_decision_regions(X_tr_scaled_pair, y_tr.values, clf)
         plot_dataset(X_tr_scaled_pair, y_tr.values)
-        plt.title(f"{name} - Decision Regions with features ({feat0}, {feat1})")
-        filename = f"decision_region_{name.replace(' ', '_')}_{feat0}_{feat1}.png"
+        plt.title(f"{name} - Decision Regions with features ({feat0}, {feat1} - Francesca)")
+        filename = f"decision_region_{name.replace(' ', '_')}_{feat0}_{feat1}_Francesca.png"
         plt.savefig(os.path.join(plot_dir, filename), dpi=300, bbox_inches='tight')
         plt.close()
 
@@ -285,6 +285,6 @@ for feat0, feat1 in feature_pairs:
 
 # === Salvataggio metriche ===
 df_results = pd.DataFrame(results_list)
-df_results.to_csv(os.path.join(metrics_dir, "metrics_summary_validation_2f.csv"), index=False)
-with open(os.path.join(metrics_dir, "metrics_summary_validation_2f.txt"), "w", encoding="utf-8") as f:
+df_results.to_csv(os.path.join(metrics_dir, "metrics_summary_validation_2f_Francesca.csv"), index=False)
+with open(os.path.join(metrics_dir, "metrics_summary_validation_2f_Francesca.txt"), "w", encoding="utf-8") as f:
     f.write(df_results.to_string(index=False))

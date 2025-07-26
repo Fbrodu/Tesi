@@ -39,10 +39,10 @@ def analyze_file(folder_path, group):
             # Trova i due punti che stanno sopra e sotto il valore target (Ao - 3)
             sign_change = np.where(np.diff(np.sign(diffs)))[0]
 
-            # Cerca se esiste almeno un punto di attraversamento
+            # Verifica che esistano i due punti
             if len(sign_change) > 0:
 
-                # Primo intervallo in cui avviene l'attraversamento
+                # Primo punto
                 i = sign_change[0]
 
                 # Ricava le due frequenze (x0, x1) e i due guadagni (y0, y1) 
@@ -53,13 +53,13 @@ def analyze_file(folder_path, group):
                 # Calcola la pendenza della retta che unisce i due punti
                 slope = (y1 - y0) / (x1 - x0)
 
-                # Retta per trovare la frequenza esatta in cui il guadagno è pari a Ao - 3
+                # Frequenza esatta in cui il guadagno è pari a Ao - 3
                 cutoff_freq = x0 + (target_gain - y0) / slope
                 cutoffs.append(cutoff_freq)
 
     if gains and cutoffs:
         avg_gain = np.mean(gains)
-        avg_cutoff = np.mean(cutoffs)
+        avg_cutoff = np.mean(cutoffs) / 1000  # Conversione in kHz
 
         # Estrazione ID e flag original
         ID = os.path.basename(folder_path)
