@@ -57,7 +57,7 @@ I metodi confrontati sono:
 
 Sono stati utilizzati i seguenti classificatori con **GridSearchCV** per l’ottimizzazione degli iperparametri:
 - **SVM** con kernel lineare
-- **SVM** con kernel RBF (radiale)
+- **SVM** con kernel RBF 
 - **k-NN** (K-Nearest Neighbors)
 
 La valutazione dei modelli è stata effettuata con **cross-validation** ripetuta su 5 fold, e le metriche analizzate includono accuratezza, precisione, recall, F1-score e matrice di confusione.  
