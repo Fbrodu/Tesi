@@ -39,7 +39,7 @@ I file `LM386_Current_Slope_Francesca.csv` e `LM386_Gain_Freq_Francesca.csv` con
 
 ### 3. Visualizzazione e Classificazione
 - `LM386_2features.py` – genera scatter plot a 2 a 2 tra le feature
-- - `LM386.py` – valuta le 4 features contemporanemamente (da aggiornare)
+- `LM386.py` – valuta le 4 features contemporanemamente (da aggiornare)
 
 ### 4. File di Output
 I grafici e le metriche vengono salvati in:
