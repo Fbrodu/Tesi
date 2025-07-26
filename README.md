@@ -1,4 +1,4 @@
-# Tesi- Classificazione LM386 Originali e Contraffatti
+# Tesi - Classificazione LM386 Originali e Contraffatti
 
 Questo progetto ha l’obiettivo di analizzare dispositivi LM386 tramite l’estrazione di caratteristiche elettriche, con lo scopo di individuare eventuali differenze tra dispositivi originali contraffatti.  
 Le misure includono parametri sia DC sia AC.
