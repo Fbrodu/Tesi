@@ -53,7 +53,7 @@ I metodi confrontati sono:
 
 ### 4. Visualizzazione e Classificazione
 - `LM386_2features.py` – genera scatter plot a 2 a 2 tra le features
-- `LM386.py` – valuta le 4 features contemporanemamente (da aggiornare)
+- `LM386.py` – valuta le 4 features contemporaneamente (da aggiornare)
 
 ### 5. File di Output
 I grafici e le metriche vengono salvati in:
