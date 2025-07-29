@@ -5,8 +5,9 @@ import re
 
 # === PERCORSI AI FILE ===
 folders = {
-    'RSAM': '/workspaces/Tesi/Estrazione Features/Frequenza/RSAM',
-    'UTC_CD': '/workspaces/Tesi/Estrazione Features/Frequenza/UTC_CD'
+    #'RSAM': '/workspaces/Tesi/Estrazione Features/Frequenza/RSAM',
+    #'UTC_CD': '/workspaces/Tesi/Estrazione Features/Frequenza/UTC_CD'
+    'MAMX': '/workspaces/Tesi/Estrazione Features/Frequenza/MAMX'
 }
 
 # === FUNZIONE CHE ANALIZZA UNA CARTELLA DI UN DISPOSITIVO ===
@@ -63,7 +64,7 @@ def analyze_file(folder_path, group):
 
         # Estrazione ID e flag original
         ID = os.path.basename(folder_path)
-        original = True if group == 'RSAM' else False
+        original = True if group == 'MAMX' else False
 
         return {
             'group': group,
@@ -102,6 +103,6 @@ output_df['ID_num'] = output_df['ID'].apply(extract_number)
 output_df = output_df.sort_values(by=['group', 'ID_num'])
 output_df = output_df.drop(columns='ID_num')
 
-output_path = '/workspaces/Tesi/Estrazione Features/LM386_Gain_Freq_Francesca.csv'
+output_path = '/workspaces/Tesi/Estrazione Features/LM386_Gain_Freq_MAMX.csv'
 output_df.to_csv(output_path, index=False)
-print(f"File salvato: LM386_Gain_Freq_Francesca.csv in {output_path}")
+print(f"File salvato: LM386_Gain_Freq_MAMX.csv in {output_path}")
