@@ -5,8 +5,8 @@
 import pandas as pd
 
 # === PERCORSI FILE===
-#gain_freq_path = "/workspaces/Tesi/Estrazione Features/LM386_Gain_Freq_Francesca.csv"
-#current_slope_path = "/workspaces/Tesi/Estrazione Features/LM386_Current_Slope_Francesca.csv"
+gain_freq_path = "/workspaces/Tesi/Estrazione Features/LM386_Gain_Freq_Francesca.csv"
+current_slope_path = "/workspaces/Tesi/Estrazione Features/LM386_Current_Slope_Francesca.csv"
 francesca_path = "/workspaces/Tesi/LM386_Features_4D_Francesca.csv"
 simone_path = "/workspaces/Tesi/LM386_Features_4D_Simone.csv"
 

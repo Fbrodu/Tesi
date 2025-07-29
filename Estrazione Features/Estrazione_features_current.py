@@ -44,7 +44,7 @@ def analyze_file(filepath, group):
 
     filename = os.path.basename(filepath).replace(".xlsx", "")
     ID = filename
-    original = True if group == 'RSAM' else False
+    original = True if group == 'MAMX' else False
 
     return {
         'group': group,
@@ -56,8 +56,9 @@ def analyze_file(filepath, group):
 
 # === PERCORSI AI FILE ===
 folders = {
-    'RSAM': '/workspaces/Tesi/Estrazione Features/Current/RSAM',
-    'UTC_CD': '/workspaces/Tesi/Estrazione Features/Current/UTC_CD'
+    #'RSAM': '/workspaces/Tesi/Estrazione Features/Current/RSAM',
+    #'UTC_CD': '/workspaces/Tesi/Estrazione Features/Current/UTC_CD'
+    'MAMX': '/workspaces/Tesi/Estrazione Features/Current/MAMX'
 }
 
 # === ANALISI DEI FILE ===
@@ -75,18 +76,18 @@ for group, folder_path in folders.items():
 
 
 # === SALVATAGGIO ORDINATO PER GRUPPO E NUMERO ===
-import re
+#import re
 
-def extract_number(id_str):
-    match = re.search(r'(\d+)$', id_str)
-    return int(match.group(1)) if match else -1
+#def extract_number(id_str):
+#    match = re.search(r'(\d+)$', id_str)
+#    return int(match.group(1)) if match else -1
 
 # Ordina prima per 'group' (RSAM < UTC_CD), poi per numero estratto da 'ID'
 output_df = pd.DataFrame(results)
-output_df['ID_num'] = output_df['ID'].apply(extract_number)
-output_df = output_df.sort_values(by=['group', 'ID_num'])
-output_df = output_df.drop(columns='ID_num')
+#output_df['ID_num'] = output_df['ID'].apply(extract_number)
+#output_df = output_df.sort_values(by=['group', 'ID_num'])
+#output_df = output_df.drop(columns='ID_num')
 
-output_path = '/workspaces/Tesi/Estrazione Features/LM386_Current_Slope_Francesca.csv'
+output_path = '/workspaces/Tesi/Estrazione Features/LM386_Current_Slope_MAMX.csv'
 output_df.to_csv(output_path, index=False)
-print(f"File salvato: LM386_Current_Slope_Francesca.csv in {output_path}")
+print(f"File salvato: LM386_Current_Slope_MAMX.csv in {output_path}")
