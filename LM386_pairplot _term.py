@@ -6,7 +6,7 @@ from sklearn.preprocessing import RobustScaler
 import os
 
 # === Caricamento dati ===
-dataset = pd.read_csv("LM386_Features_5D_solo_term.csv")
+dataset = pd.read_csv("LM386_Features_5D_all.csv")
 features = ["quiescent_current", "voltage_gain", "cutoff_frequency", "current_slope", "T_low_gain", "T_high_gain"]
 
 # === Split 80/20 (senza divisione per gruppo) ===
